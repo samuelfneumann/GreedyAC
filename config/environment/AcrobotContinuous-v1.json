@@ -1,0 +1,12 @@
+{
+    "env_name": "Acrobot-v1",
+    "total_timesteps": 100000,
+    "steps_per_episode": 1000,
+    "eval_interval_timesteps": 110000,
+    "eval_episodes": 0,
+    "gamma": 0.99,
+	"continuous": true,
+    "overwrite_rewards": false,
+    "rewards": {},
+    "start_state": []
+}

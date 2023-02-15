@@ -1,0 +1,27 @@
+{
+    "agent_name": "SAC",
+    "parameters":
+    {
+        "replay_capacity": [100000],
+        "batch_size": [32],
+        "tau": [0.01],
+        "num_hidden": [3],
+		"reparameterized": [true],
+        "soft_q": [true],
+        "double_q": [true],
+		"num_samples": [1],
+		"baseline_actions": [0],
+		"alpha": [0.001, 0.01, 0.1, 1.0, 10.0],
+		"betas": [[0.9, 0.999]],
+        "policy_type": ["SquashedGaussian"],
+        "target_update_interval": [1],
+        "critic_lr": [1e-1, 1e-2, 1e-3, 1e-4, 1e-5],
+        "actor_lr_scale": [1e-3, 1e-2, 1e-1, 1.0, 2.0, 10.0],
+        "alpha_lr": [0.0],
+        "hidden_dim": [64],
+        "automatic_entropy_tuning": [false],
+        "weight_init": ["xavier_uniform"],
+        "clip_stddev": [1000],
+		"cuda": [false]
+    }
+}

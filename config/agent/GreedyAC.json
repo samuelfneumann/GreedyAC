@@ -1,0 +1,20 @@
+{
+    "agent_name": "GreedyAC",
+    "parameters":
+    {
+        "replay_capacity": [100000],
+        "batch_size": [32],
+        "tau": [0.01],
+		"alpha": [0.001, 0.01, 0.1, 1.0, 10.0],
+		"betas": [[0.9, 0.999]],
+        "policy_type": ["Gaussian"],
+        "target_update_interval": [1],
+        "critic_lr": [1e-1, 1e-2, 1e-3, 1e-4, 1e-5],
+        "actor_lr_scale": [1e-3, 1e-2, 1e-1, 1.0, 2.0, 10.0],
+        "hidden_dim": [64],
+        "weight_init": ["xavier_uniform"],
+        "clip_stddev": [1000],
+		"cuda": [false],
+		"n_rho": [[30, 0.1]]
+    }
+}

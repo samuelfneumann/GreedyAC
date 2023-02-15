@@ -1,0 +1,12 @@
+{
+    "env_name": "MountainCarContinuous-v0",
+    "total_timesteps": 100000,
+    "steps_per_episode": 1000,
+    "eval_interval_timesteps": 1100000,
+    "eval_episodes": 0,
+    "gamma": 0.99,
+    "overwrite_rewards": true,
+	"use_tile_coding": false,
+    "rewards": {"timestep": -1.0, "goal": -1.0},
+    "start_state": []
+}
