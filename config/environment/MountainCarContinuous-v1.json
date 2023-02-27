@@ -6,7 +6,6 @@
     "eval_episodes": 0,
     "gamma": 0.99,
     "overwrite_rewards": true,
-	"use_tile_coding": false,
     "rewards": {"timestep": -1.0, "goal": -1.0},
     "start_state": []
 }

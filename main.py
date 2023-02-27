@@ -12,16 +12,8 @@ import utils.hypers as hypers
 import socket
 
 
-@click.command(help="Given an environment, agent name, and a range of " +
-               "values, trains the agent on the environment for each " +
-               "hyperparameter setting with index corresponding to each " +
-               "value in the argument range of values. Values in the range " +
-               "that are higher than the maximum hyperparameter settings " +
-               "will wrap around and perform subsequent runs. For " +
-               "example, if there are 10 hyperparameter settings and one " +
-               "element in the argument range is 11, then this element " +
-               "will correspond to the 2nd run of the first hyperparameter " +
-               "setting")
+@click.command(help="Run an experiment outlined by an algorithm and " +
+               "environment configuration file")
 @click.option("--env-json", help="Path to the environment json " +
               "configuration file",
               type=str, required=True)
