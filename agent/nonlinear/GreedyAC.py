@@ -13,6 +13,9 @@ import inspect
 
 
 class GreedyAC(BaseAgent):
+    """
+    GreedyAC implements the GreedyAC algorithm with continuous actions.
+    """
     def __init__(self, num_inputs, action_space, gamma, tau, alpha, policy,
                  target_update_interval, critic_lr, actor_lr_scale,
                  actor_hidden_dim, critic_hidden_dim, replay_capacity, seed,
@@ -187,9 +190,6 @@ class GreedyAC(BaseAgent):
         self.policy_optim.step()
 
         # Calculate sampler entropy
-        # This is horrible! We calculate the log prob for a bunch of actions
-        # then only use some of them in the regularization! This is fixed in
-        # PyRL.
         stacked_s_batch = state_batch.repeat_interleave(self.num_samples,
                                                         dim=0)
         stacked_s_batch = stacked_s_batch.reshape(-1, self.state_dims)
@@ -208,7 +208,6 @@ class GreedyAC(BaseAgent):
 
         # Calculate sampler loss
         stacked_s_batch = state_batch.repeat_interleave(samples, dim=0)
-        # print("Computing sampler loss")
         sampler_loss = self.sampler.log_prob(stacked_s_batch, best_actions)
         sampler_loss = sampler_loss.reshape(self.batch_size, samples, 1)
         sampler_loss = sampler_loss.mean(axis=1)

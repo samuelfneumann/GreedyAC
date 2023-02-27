@@ -13,6 +13,9 @@ import agent.nonlinear.nn_utils as nn_utils
 
 
 class GreedyACDiscrete(BaseAgent):
+    """
+    GreedyACDiscrete implements the GreedyAC algorithm with discrete actions
+    """
     def __init__(self, num_inputs, action_space, gamma, tau, policy,
                  target_update_interval, critic_lr, actor_lr_scale,
                  actor_hidden_dim, critic_hidden_dim, replay_capacity, seed,
