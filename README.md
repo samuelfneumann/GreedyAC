@@ -104,6 +104,18 @@ using the associated hyperparameter setting. To run multiple hyperparameter
 settings in parallel, you can use [GNU
 Parallel](https://www.gnu.org/software/parallel/)
 
+One data file will be saved each time you run an experiment. To combine these
+individual data files into a single data file, you can use the `combine.py`
+script:
+
+```bash
+python3 combine.py SAVE_FILE PATH_TO_DATA_DIR
+```
+
+where `PATH_TO_DATA_DIR` is the path to the directory holding all the
+individual data files to combine and `SAVE_FILE` is the desired path/filename
+of the resulting file combined data file.
+
 ## Citing
 
 If you use this code or reference our work, please cite:

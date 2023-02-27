@@ -473,12 +473,15 @@ def get_returns(data, type_, ind, env_type="continuing"):
         time performance was evaluated offline.
     """
     if env_type == "episodic":
-        # data = reduce_episodes(data, ind, type_)
         data = runs.expand_episodes(data, ind, type_)
 
     returns = []
     if type_ == "eval":
         # Get the offline evaluation episode returns per run
+        if data['experiment']['environment']['eval_episodes'] == 0:
+            raise ValueError("cannot plot eval performance when " +
+                             "experiment was run with eval_episodes = 0 in " +
+                             "the configuration file")
         for run in data["experiment_data"][ind]["runs"]:
             returns.append(run["eval_episode_rewards"])
         returns = np.stack(returns)
