@@ -25,7 +25,6 @@ class GreedyAC(BaseAgent):
         super().__init__()
 
         self.batch = True
-        self._t = -1
 
         # Ensure batch size < replay capacity
         if batch_size > replay_capacity:
@@ -46,7 +45,6 @@ class GreedyAC(BaseAgent):
         self.state_dims = num_inputs
         self.discrete_action = isinstance(action_space, Discrete)
         self.action_space = action_space
-        self._obs_space = env.observation_space
 
         self.device = torch.device("cuda:0" if cuda and
                                    torch.cuda.is_available() else "cpu")
@@ -105,8 +103,6 @@ class GreedyAC(BaseAgent):
 
         source = inspect.getsource(inspect.getmodule(inspect.currentframe()))
         self.info["source"] = source
-
-        self._env = env
 
     def update(self, state, action, reward, next_state, done_mask):
         # Adjust action shape to ensure it fits in replay buffer properly
