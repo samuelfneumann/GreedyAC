@@ -118,7 +118,6 @@ class SAC(BaseAgent):
             If the batch size is larger than the replay buffer
         """
         super().__init__()
-        self._t = -1
         self._env = env
 
         # Ensure batch size < replay capacity
@@ -140,17 +139,17 @@ class SAC(BaseAgent):
 
         # Set the seed for all random number generators, this includes
         # everything used by PyTorch, including setting the initial weights
-        # of networks. PyTorch prefers seeds with many non-zero binary units
+        # of networks.
         self._torch_rng = torch.manual_seed(seed)
         self._rng = np.random.default_rng(seed)
 
         # Random hypers and fields
-        self._is_training = True  # Whether in training or evaluation mode
-        self._gamma = gamma  # Discount factor
-        self._tau = tau  # Polyak averaging constant for target networks
-        self._reparameterized = reparameterized  # Whether to use reparam trick
-        self._soft_q = soft_q  # Whether to use soft Q functions or nor
-        self._double_q = double_q  # Whether or not to use a double Q critic
+        self._is_training = True
+        self._gamma = gamma
+        self._tau = tau
+        self._reparameterized = reparameterized
+        self._soft_q = soft_q
+        self._double_q = double_q
         if num_samples < 1:
             raise ValueError("cannot have num_samples < 1")
         self._num_samples = num_samples  # Sample for likelihood-based gradient
@@ -171,9 +170,9 @@ class SAC(BaseAgent):
         # Automatic entropy tuning
         self._automatic_entropy_tuning = automatic_entropy_tuning
         self._alpha_lr = alpha_lr
-        # assert not self._automatic_entropy_tuning
-        if self._automatic_entropy_tuning and self._alpha_lr == 0:
-            raise ValueError("should not use entropy lr == 0")
+
+        if self._automatic_entropy_tuning and self._alpha_lr <= 0:
+            raise ValueError("should not use entropy lr <= 0")
 
         # Set up the critic and target critic
         self._init_critic(
@@ -215,7 +214,8 @@ class SAC(BaseAgent):
         else:
             self._alpha = alpha  # Entropy scale
 
-        self.info["entropy"] = []
+        source = inspect.getsource(inspect.getmodule(inspect.currentframe()))
+        self.info["source"] = source
 
     def sample_action(self, state):
         state = torch.FloatTensor(state).to(self._device).unsqueeze(0)
