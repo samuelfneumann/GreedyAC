@@ -16,13 +16,11 @@ class VAC(BaseAgent):
     """
     VAC implements the Vanilla Actor-Critic agent
     """
-
     def __init__(self, num_inputs, action_space, gamma, tau, alpha, policy,
                  target_update_interval, critic_lr, actor_lr_scale,
                  num_samples, actor_hidden_dim, critic_hidden_dim,
                  replay_capacity, seed, batch_size, betas, env, cuda=False,
-                 clip_stddev=1000, init=None, activation="relu",
-                 reparameterized=False):
+                 clip_stddev=1000, init=None, activation="relu"):
         """
         Constructor
 
@@ -97,15 +95,13 @@ class VAC(BaseAgent):
         self.tau = tau
         self.alpha = alpha
         self.action_space = action_space
-        self.reparam = reparameterized
 
         if not isinstance(action_space, Box):
             raise ValueError("VAC only works with Box action spaces")
 
         self.state_dims = num_inputs
         self.num_samples = num_samples - 1
-        if not self.reparam:
-            assert num_samples >= 2
+        assert num_samples >= 2
 
         self.device = torch.device("cuda:0" if cuda and
                                    torch.cuda.is_available() else "cpu")
@@ -160,7 +156,10 @@ class VAC(BaseAgent):
             raise NotImplementedError
 
         source = inspect.getsource(inspect.getmodule(inspect.currentframe()))
-        self.info["source"]: source
+        self.info = {}
+        self.info = {
+            "source": source,
+        }
 
     def sample_action(self, state):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
@@ -170,6 +169,8 @@ class VAC(BaseAgent):
             _, _, action = self.policy.sample(state)
 
         act = action.detach().cpu().numpy()[0]
+
+        return act
 
     def update(self, state, action, reward, next_state, done_mask):
         # Keep transition in replay buffer
@@ -200,78 +201,49 @@ class VAC(BaseAgent):
         q_loss.backward()
         self.critic_optim.step()
 
-        if not self.reparam:
-            # Sample action that the agent would take
-            pi, _, _ = self.policy.sample(state_batch)
+        # Sample action that the agent would take
+        pi, _, _ = self.policy.sample(state_batch)
 
-            # Calculate the advantage
-            with torch.no_grad():
-                q_pi = self.critic(state_batch, pi)
-            sampled_actions, _, _ = self.policy.sample(state_batch,
-                                                       self.num_samples)
-            if self.num_samples == 1:
-                sampled_actions = sampled_actions.unsqueeze(0)
-            sampled_actions = torch.permute(sampled_actions, (1, 0, 2))
+        # Calculate the advantage
+        with torch.no_grad():
+            q_pi = self.critic(state_batch, pi)
+        sampled_actions, _, _ = self.policy.sample(state_batch,
+                                                   self.num_samples)
+        if self.num_samples == 1:
+            sampled_actions = sampled_actions.unsqueeze(0)
+        sampled_actions = torch.permute(sampled_actions, (1, 0, 2))
 
-            state_baseline = 0
-            if self.num_samples > 2:
-                # Baseline computed with self.num_samples - 1 action
-                # value estimates
-                baseline_actions = sampled_actions
-                baseline_actions = torch.reshape(baseline_actions,
-                                                 [-1, self.action_dims])
-                stacked_s_batch = torch.repeat_interleave(state_batch,
-                                                          self.num_samples,
-                                                          dim=0)
-                stacked_s_batch = torch.reshape(stacked_s_batch,
-                                                [-1, self.state_dims])
+        state_baseline = 0
+        if self.num_samples > 2:
+            # Baseline computed with self.num_samples - 1 action
+            # value estimates
+            baseline_actions = sampled_actions[:, :-1]
+            baseline_actions = torch.reshape(baseline_actions,
+                                             [-1, self.action_dims])
+            stacked_s_batch = torch.repeat_interleave(state_batch,
+                                                      self.num_samples-1,
+                                                      dim=0)
+            stacked_s_batch = torch.reshape(stacked_s_batch,
+                                            [-1, self.state_dims])
 
-                baseline_q_vals = self.critic(stacked_s_batch,
-                                              baseline_actions)
+            baseline_q_vals = self.critic(stacked_s_batch,
+                                          baseline_actions)
 
-                baseline_q_vals = torch.reshape(baseline_q_vals,
-                                                [self.batch_size,
-                                                    self.num_samples])
-                state_baseline = baseline_q_vals.mean(axis=1).unsqueeze(1)
-            advantage = q_pi - state_baseline
+            baseline_q_vals = torch.reshape(baseline_q_vals,
+                                            [self.batch_size,
+                                                self.num_samples-1])
+            state_baseline = baseline_q_vals.mean(axis=1).unsqueeze(1)
+        advantage = q_pi - state_baseline
 
-            # Estimate the entropy from a single sampled action in each state
-            entropy_actions = pi
-            entropy = self.policy.log_prob(state_batch, entropy_actions)
-            with torch.no_grad():
-                entropy *= entropy
-            entropy = -entropy
+        # Estimate the entropy from a single sampled action in each state
+        entropy_actions = sampled_actions[:, -1]
+        entropy = self.policy.log_prob(state_batch, entropy_actions)
+        with torch.no_grad():
+            entropy *= entropy
+        entropy = -entropy
 
-            policy_loss = self.policy.log_prob(state_batch, pi) * advantage
-            policy_loss = -(policy_loss + (self.alpha * entropy)).mean()
-        else:
-            if self.num_samples >= 1:
-                pi, log_pi = self.policy.rsample(
-                    state_batch,
-                    num_samples=self.num_samples,
-                )[:2]
-                pi = pi.transpose(0, 1).reshape(
-                    -1,
-                    self.action_space.high.shape[0],
-                )
-                s_state_batch = state_batch.repeat_interleave(
-                    self.num_samples,
-                    dim=0,
-                )
-                q = self.critic(s_state_batch, pi)
-                q = q.reshape(self.batch_size, self.num_samples + 1, -1)
-
-                # Don't backprop through the approximate state-value baseline
-                baseline = q[:, 1:].mean(axis=1).squeeze().detach()
-
-                log_pi = log_pi[0, :, 0]
-                q = q[:, 0, 0]
-                q -= baseline
-            else:
-                pi, log_pi = self.policy.rsample(state_batch)[:2]
-                q = self.critic(state_batch, pi)
-
-            policy_loss = ((self.alpha * log_pi) - q).mean()
+        policy_loss = self.policy.log_prob(state_batch, pi) * advantage
+        policy_loss = -(policy_loss + (self.alpha * entropy)).mean()
 
         # Update the actor
         self.policy_optim.zero_grad()

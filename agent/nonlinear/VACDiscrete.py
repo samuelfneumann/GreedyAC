@@ -147,7 +147,6 @@ class VACDiscrete(BaseAgent):
         source = inspect.getsource(inspect.getmodule(inspect.currentframe()))
         self.info = {}
         self.info = {
-            "action_values": [],
             "source": source,
         }
 
