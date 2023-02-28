@@ -2,7 +2,6 @@
     "agent_name": "vac",
     "parameters":
     {
-		"reparameterized": [false],
         "replay_capacity": [100000],
         "batch_size": [32],
         "tau": [0.01],

@@ -53,7 +53,6 @@ def create_agent(agent, config):
             init=config["weight_init"], betas=config["betas"],
             num_samples=config["num_samples"], activation="relu",
             env=config["env"],
-            reparameterized=config["reparameterized"],
         )
 
     # Discrete Vanilla Actor-Critic
