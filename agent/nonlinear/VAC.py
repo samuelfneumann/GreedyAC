@@ -81,8 +81,6 @@ class VAC(BaseAgent):
         super().__init__()
         self.batch = True
 
-        self._t = -1
-
         # Ensure batch size < replay capacity
         if batch_size > replay_capacity:
             raise ValueError("cannot have a batch larger than replay " +
