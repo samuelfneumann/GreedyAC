@@ -11,6 +11,22 @@ To install dependencies, run:
 pip install -r requirements.txt
 ```
 
+## Directory Hierarchy
+This codebase has the following layout:
+```
+.
+├── agent						# Files relating to algo implementations
+│   ├── nonlinear				# Algos using nonlinear function approx
+│   │   ├── policy				# Policies
+│   │   └── value_function		# Value functions
+├── config						# Configuration files for experiments
+│   ├── agent					# Configuration files for algos
+│   └── environment				# Configuration files for environments
+├── env							# Environment implementations
+│   ├── assets					# Assets for visualization
+└── utils						# Utilities for running experiments
+```
+
 ## Running the Code
 
 This codebase works by reading `json` configuration files and running the
