@@ -42,7 +42,6 @@ class Environment:
         self.monitor = monitor
         self.steps_until_monitor = monitor_after
 
-        # Set the gym variables
         self.env_name = config["env_name"]
 
         self.env = env_factory(config)
@@ -162,7 +161,6 @@ class Environment:
 
         # If the maximum time-step was reached
         if self.steps >= self.steps_per_episode > 0:
-            # print("Steps exceeded")
             done = True
             info["steps_exceeded"] = True
 
@@ -255,6 +253,8 @@ def env_factory(config):
         )
 
     else:
+        # Ensure we use the base gym environment. `gym.make` returns a TimeStep
+        # environment wrapper, but we want the underlying environment alone.
         env = gym.make(name).env
         env.seed(seed)
 

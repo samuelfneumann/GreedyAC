@@ -23,6 +23,8 @@ class Experiment:
             The agent to run the experiment on
         env : environment.Environment
             The environment to use for the experiment
+        eval_env : environment.Environment
+            The environment to use for offline evaluation
         eval_episodes : int
             The number of evaluation episodes to run when measuring offline
             performance
@@ -31,37 +33,6 @@ class Experiment:
         eval_interval_timesteps: int
             The interval of timesteps at which an agent's performance will be
             evaluated
-        state_bins : tuple of int
-            For the sequence of states used in each update, the number of bins
-            per dimension with which to bin the states.
-        min_state_values : array_like
-             The minimum value of states along each dimension, used to encode
-             states used in updates to count the number of times states are
-             used in each update.
-        max_state_values : array_like
-             The maximum value of states along each dimension, used to encode
-             states used in updates to count the number of times states are
-             used in each update.
-        action_bins : tuple of int
-            For the sequence of actions used in each update, the number of bins
-            per dimension with which to bin the actions.
-        min_action_values : array_like
-             The minimum value of actions along each dimension, used to encode
-             actions used in updates to count the number of times actions are
-             used in each update.
-        max_state_values : array_like
-             The maximum value of actions along each dimension, used to encode
-             actions used in updates to count the number of times actions are
-             used in each update.
-        count_interval : int
-            The interval of timesteps at which we will store the counts of
-            state or action bins seen during training or used in updates. At
-            each timestep, we determine which state/action bins were used in
-            an update or seen at the current timestep. These values are
-            accumulated so that the total number of times each bin was
-            seen/used is stored up to the current timestep. This parameter
-            controls the timestep interval at which these accumulated values
-            should be checkpointed.
         max_episodes : int
             The maximum number of episodes to run. If <= 0, then there is no
             episode limit.
@@ -168,9 +139,7 @@ class Experiment:
         self.train_episodes += 1
 
         # Track the sequences of states, rewards, and actions during training
-        # episode_states = []
         episode_rewards = []
-        # episode_actions = []
 
         start = time.time()
         episode_return = 0.0
@@ -192,14 +161,18 @@ class Experiment:
             next_state, reward, done, info = self.env.step(action)
             episode_steps += 1
 
-            # episode_states.append(next_state_info["orig_state"])
             episode_rewards.append(reward)
             episode_return += reward
 
             # Compute the done mask, which is 1 if the episode terminated
             # without the goal being reached or the episode is incomplete,
-            # and 0 if the agent reached the goal or terminal state
+            # and 0 if the agent reached the goal or terminal state. When
+            # bootstrapping with target value `target`, we'll use
+            # `effective_target = done_mask * target`. For example, when
+            # updating state-value function v(s) using gradient descent, we'll
+            # use v(s) <- v(s) + α(r + done_mask * v(s') - v(s))
             if self.env.steps_per_episode <= 1:
+                # Bandit problem
                 done_mask = 0
             else:
                 if episode_steps <= self.env.steps_per_episode and done and \
