@@ -8,6 +8,7 @@ import agent.nonlinear.nn_utils as nn_utils
 from agent.nonlinear.policy.MLP import SquashedGaussian, Gaussian
 from agent.nonlinear.value_function.MLP import DoubleQ, Q
 from utils.experience_replay import TorchBuffer as ExperienceReplay
+import inspect
 
 
 class SAC(BaseAgent):
@@ -336,8 +337,6 @@ class SAC(BaseAgent):
 
         # Tune the entropy if appropriate
         if self._automatic_entropy_tuning:
-            # In [SAC: alg and applic], α = ln(β) is the dual variable, and
-            # β is the entropy scale.
             alpha_loss = -(self._log_alpha *
                            (log_pi + self._target_entropy).detach()).mean()
 

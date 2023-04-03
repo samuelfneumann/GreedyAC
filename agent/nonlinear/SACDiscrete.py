@@ -15,12 +15,11 @@ from utils.experience_replay import TorchBuffer as ExperienceReplay
 
 
 class SACDiscrete(BaseAgent):
-    def __init__(self, env, gamma, tau, alpha, policy,
-                 target_update_interval, critic_lr, actor_lr_scale, alpha_lr,
-                 actor_hidden_dim, critic_hidden_dim, replay_capacity, seed,
-                 batch_size, betas, double_q=True, soft_q=True,
-                 automatic_entropy_tuning=False, cuda=False,
-                 clip_stddev=1000, init=None, activation="relu"):
+    def __init__(self, env, gamma, tau, alpha, policy, target_update_interval,
+                 critic_lr, actor_lr_scale, actor_hidden_dim,
+                 critic_hidden_dim, replay_capacity, seed, batch_size, betas,
+                 double_q=True, soft_q=True, cuda=False, clip_stddev=1000,
+                 init=None, activation="relu"):
         """
         Constructor
 
@@ -46,10 +45,6 @@ class SACDiscrete(BaseAgent):
             The critic learning rate
         actor_lr : float
             The actor learning rate
-        alpha_lr : float
-            The learning rate for the entropy parameter, if using an automatic
-            entropy tuning algorithm (see automatic_entropy_tuning) parameter
-            below
         actor_hidden_dim : int
             The number of hidden units in the actor's neural network
         critic_hidden_dim : int
@@ -60,9 +55,6 @@ class SACDiscrete(BaseAgent):
             The random seed so that random samples of batches are repeatable
         batch_size : int
             The number of elements in a batch for the batch update
-        automatic_entropy_tuning : bool, optional
-            Whether the agent should automatically tune its entropy
-            hyperparmeter alpha, by default False
         cuda : bool, optional
             Whether or not cuda should be used for training, by default False.
             Note that if True, cuda is only utilized if available.
@@ -132,19 +124,6 @@ class SACDiscrete(BaseAgent):
         self._init_policy(obs_space, action_space, actor_hidden_dim, init,
                           activation, actor_lr_scale * critic_lr, betas,
                           clip_stddev)
-
-        # Set up auto entropy tuning
-        self.automatic_entropy_tuning = automatic_entropy_tuning
-        if self.automatic_entropy_tuning is True:
-            self.target_entropy = -torch.prod(
-                torch.Tensor(action_space.shape).to(self._device)
-            ).item()
-            self.log_alpha = torch.zeros(
-                1,
-                requires_grad=True,
-                device=self.device,
-            )
-            self.alpha_optim = Adam([self.log_alpha], lr=alpha_lr)
 
     def sample_action(self, state):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
@@ -378,14 +357,3 @@ class SACDiscrete(BaseAgent):
         self.policy_optim.zero_grad()
         policy_loss.backward()
         self.policy_optim.step()
-
-        # Tune the entropy if appropriate
-        if self.automatic_entropy_tuning:
-            alpha_loss = -(self.log_alpha *
-                           (log_pi + self.target_entropy).detach()).mean()
-
-            self.alpha_optim.zero_grad()
-            alpha_loss.backward()
-            self.alpha_optim.step()
-
-            self.alpha = self.log_alpha.exp()
