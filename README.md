@@ -11,6 +11,8 @@ To install dependencies, run:
 pip install -r requirements.txt
 ```
 
+and then install [MinAtar 1.0.10 (commit 2a12fc8af0402f7473c567b2d74f7236b2551681)](https://github.com/kenjyoung/MinAtar/tree/2a12fc8af0402f7473c567b2d74f7236b2551681).
+
 ## Running the Code
 
 This codebase works by reading `json` configuration files and running the
