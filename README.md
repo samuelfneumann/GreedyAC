@@ -34,6 +34,44 @@ Data from the experiment will be saved at `./results/SAVE_DIR`.
 
 For more information, see `python3 main.py --help`
 
+### Combining Mutiple Outputs
+
+When you run many experiments, you may end up with many different data files.
+For example, if you run
+
+```bash
+for i in $(seq 0 2); do
+	python3 main.py --agent-json config/agent/GreedyAC.json --env-json config/enviroment/AcrobotContinuous-v1.json --index 0 --save-dir "output"
+done
+```
+
+You'll end up with three files in the `output` directory:
+
+```
+AcrobotContinuous-v1_GreedyAC_data_0.pkl
+AcrobotContinuous-v1_GreedyAC_data_1.pkl
+AcrobotContinuous-v1_GreedyAC_data_2.pkl
+```
+
+To combine all these files into one, you can do the following:
+
+```bash
+./combine.py output/combined.pkl output/
+```
+
+This will combine all the files in output to produce a single `combined.pkl`
+file. If you run `ls output`, you'll see:
+
+```
+AcrobotContinuous-v1_GreedyAC_data_0.pkl
+AcrobotContinuous-v1_GreedyAC_data_1.pkl
+AcrobotContinuous-v1_GreedyAC_data_2.pkl
+combined.pkl
+```
+
+You can now safely delete the three individual data files, as they have been
+combined into the single `combined.pkl` data file.
+
 ## Configuration Files
 
 ### Environment Configuration Files
