@@ -287,17 +287,8 @@ class Softmax(nn.Module):
         return log_probs
 
     def log_prob(self, states, actions):
-        """TODO: Docstring for log_prob.
-
-        Parameters
-        ----------
-        states : TODO
-        actions : TODO
-
-        Returns
-        -------
-        TODO
-
+        """
+        Returns the log probability of taking actions in states.
         """
         logits = self.forward(states)
         log_probs = F.log_softmax(logits, dim=1)
