@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-
-# Adapted from OpenAI Gym Pendulum-v0
+# This file was adapted from the Pendulum implementation in OpenAI Gym:
+# https://github.com/openai/gym/tree/master
 
 # Import modules
 import gym

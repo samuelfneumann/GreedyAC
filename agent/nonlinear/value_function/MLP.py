@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-# Import modules
 import numpy as np
 import torch
 import torch.nn as nn

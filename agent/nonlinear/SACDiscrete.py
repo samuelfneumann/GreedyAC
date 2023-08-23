@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-# Import modules
 import os
 from gym.spaces import Box
 import torch

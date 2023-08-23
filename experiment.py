@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-# Import modules
 import time
 from datetime import datetime
 from copy import deepcopy
