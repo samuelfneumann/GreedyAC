@@ -158,12 +158,11 @@ of the resulting file combined data file.
 
 If you use this code or reference our work, please cite:
 ```
-@article{neumann2023greedy,
+@inproceedings{neumann2023greedy,
 	title = {Greedy Actor-Critic: A New Conditional Cross-Entropy Method for
 	Policy Improvement},
-	author = {Neumann, Samuel and Lim, Sungsu and Joseph, Ajin and Yangchen,
-	Pan and White, Adam and White, Martha},
-	yeear = {2023}
+	author = {Neumann, Samuel and Lim, Sungsu and Joseph, Ajin and Yangchen, Pan and White, Adam and White, Martha},
+	year = {2023}
 	journal = {International Conference on Learning Representations},
 }
 ```
